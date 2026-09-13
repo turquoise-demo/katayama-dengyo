@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>人工見積り電卓｜片山電業</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;700;800&family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f5f3ee; --sumi:#1f1d1a; --copper:#b56a37; --copper-l:#e9b787;
+    --line:rgba(31,29,26,0.12); --muted:#8a8378;
+    --ok:#3d7a4f; --warn:#b58a2a; --bad:#b23b3b;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{ font-family:'Noto Sans JP',sans-serif; background:var(--cream); color:var(--sumi); min-height:100vh; font-size:15px; line-height:1.7; }
+  .serif{ font-family:'Shippori Mincho B1',serif; }
+  .eng{ font-family:'Cormorant Garamond',serif; font-style:italic; letter-spacing:0.2em; }
+  .wrap{ max-width:760px; margin:0 auto; padding:0 18px 90px; }
+
+  header.app{ position:sticky; top:0; z-index:10; background:rgba(245,243,238,0.94); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
+  header.app .inner{ max-width:760px; margin:0 auto; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .brand{ display:flex; flex-direction:column; gap:3px; line-height:1; }
+  .brand b{ font-family:'Shippori Mincho B1',serif; font-weight:800; font-size:17px; letter-spacing:0.18em; }
+  .brand span{ display:flex; align-items:center; gap:6px; }
+  .brand span i{ display:inline-block; width:12px; height:1px; background:var(--copper); }
+  .brand span em{ font-family:'Cormorant Garamond',serif; font-style:italic; font-size:10px; letter-spacing:0.24em; color:var(--copper); }
+  .tool-tag{ font-size:11px; letter-spacing:0.14em; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:5px 12px; white-space:nowrap; }
+
+  h1.page{ font-family:'Shippori Mincho B1',serif; font-weight:700; font-size:clamp(24px,5.5vw,34px); letter-spacing:0.06em; margin:30px 0 4px; }
+  .page-sub{ font-family:'Cormorant Garamond',serif; font-style:italic; font-size:13px; letter-spacing:0.22em; color:var(--copper); }
+  .lead{ font-size:13px; color:var(--muted); margin-top:10px; }
+
+  .card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px 18px; margin-top:22px; box-shadow:0 1px 0 rgba(31,29,26,0.03); }
+  .card h2{ font-family:'Shippori Mincho B1',serif; font-weight:700; font-size:17px; letter-spacing:0.08em; display:flex; align-items:baseline; gap:10px; margin-bottom:14px; }
+  .card h2 em{ font-family:'Cormorant Garamond',serif; font-style:italic; font-size:11px; letter-spacing:0.2em; color:var(--copper); }
+
+  label.f{ display:block; font-size:12.5px; font-weight:500; letter-spacing:0.06em; color:#5a5548; margin-bottom:5px; }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:520px){ .grid2{ grid-template-columns:1fr 1fr; gap:10px; } }
+  .field{ margin-bottom:14px; }
+  .inwrap{ position:relative; }
+  input[type="text"], input[type="number"]{
+    width:100%; padding:12px 14px; font-size:16px; font-family:inherit; color:var(--sumi);
+    background:var(--cream); border:1px solid var(--line); border-radius:10px; outline:none;
+  }
+  input:focus{ border-color:var(--copper); }
+  .unit{ position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:12px; color:var(--muted); pointer-events:none; }
+  .inwrap.u input{ padding-right:44px; }
+
+  .result{ background:var(--sumi); color:var(--cream); border-radius:14px; padding:22px 18px; margin-top:22px; }
+  .result h2{ font-family:'Shippori Mincho B1',serif; font-weight:700; font-size:17px; letter-spacing:0.08em; display:flex; align-items:baseline; gap:10px; margin-bottom:16px; }
+  .result h2 em{ font-family:'Cormorant Garamond',serif; font-style:italic; font-size:11px; letter-spacing:0.2em; color:var(--copper-l); }
+  .r-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px 10px; }
+  .r-item{ border:1px solid rgba(245,243,238,0.16); border-radius:10px; padding:12px 12px 10px; }
+  .r-item .k{ font-size:11px; letter-spacing:0.1em; color:rgba(245,243,238,0.6); margin-bottom:2px; }
+  .r-item .v{ font-family:'Shippori Mincho B1',serif; font-weight:700; font-size:clamp(20px,4.6vw,26px); line-height:1.2; }
+  .r-item .v small{ font-size:12px; font-weight:500; font-family:'Noto Sans JP',sans-serif; color:rgba(245,243,238,0.65); margin-left:3px; }
+  .r-item.hero{ grid-column:1 / -1; border-color:var(--copper); background:rgba(181,106,55,0.14); }
+  .r-item.hero .v{ font-size:clamp(28px,7vw,38px); color:var(--copper-l); }
+  .r-note{ font-size:11.5px; color:rgba(245,243,238,0.55); margin-top:12px; line-height:1.6; }
+
+  table.assign{ width:100%; border-collapse:collapse; font-size:13.5px; }
+  table.assign th{ font-size:11px; font-weight:500; letter-spacing:0.08em; color:var(--muted); text-align:left; padding:4px 6px 8px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  table.assign td{ padding:8px 4px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  table.assign input{ padding:8px 8px; font-size:14px; border-radius:8px; }
+  table.assign input.num{ text-align:right; }
+  .amt{ text-align:right; font-weight:700; white-space:nowrap; font-size:13.5px; }
+  .rm{ background:none; border:none; color:var(--muted); font-size:17px; cursor:pointer; padding:4px 6px; }
+  .assign-wrap{ overflow-x:auto; margin:0 -4px; }
+  .trip-cell{ text-align:center; }
+  .trip-cell input{ width:18px; height:18px; accent-color:var(--copper); }
+
+  .btn{ display:inline-flex; align-items:center; gap:8px; padding:12px 22px; border-radius:999px; border:none; cursor:pointer; font-family:inherit; font-size:14px; font-weight:500; letter-spacing:0.08em; }
+  .btn-dark{ background:var(--sumi); color:var(--cream); }
+  .btn-line{ background:none; border:1px solid var(--line); color:var(--sumi); }
+  .btn-copper{ background:var(--copper); color:#fff; }
+  .btn:active{ transform:translateY(1px); }
+
+  .totals{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px; }
+  .t-item{ background:var(--cream); border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+  .t-item .k{ font-size:10.5px; letter-spacing:0.08em; color:var(--muted); }
+  .t-item .v{ font-family:'Shippori Mincho B1',serif; font-weight:700; font-size:clamp(15px,3.6vw,20px); white-space:nowrap; }
+  .t-item.neg .v{ color:var(--bad); }
+
+  .verdict{ margin-top:16px; border-radius:10px; padding:14px 16px; font-size:14px; font-weight:500; display:none; }
+  .verdict.ok{ display:block; background:rgba(61,122,79,0.1); color:var(--ok); border:1px solid rgba(61,122,79,0.3); }
+  .verdict.warn{ display:block; background:rgba(181,138,42,0.1); color:var(--warn); border:1px solid rgba(181,138,42,0.35); }
+  .verdict.bad{ display:block; background:rgba(178,59,59,0.08); color:var(--bad); border:1px solid rgba(178,59,59,0.35); }
+  .verdict b{ font-size:18px; }
+
+  details.settings{ margin-top:22px; border:1px dashed var(--line); border-radius:12px; padding:0 16px; background:rgba(255,255,255,0.5); }
+  details.settings summary{ cursor:pointer; padding:13px 0; font-size:13px; font-weight:500; letter-spacing:0.08em; color:var(--muted); list-style:none; display:flex; justify-content:space-between; align-items:center; }
+  details.settings summary::after{ content:'＋'; color:var(--copper); }
+  details.settings[open] summary::after{ content:'−'; }
+  details.settings .body{ padding:4px 0 18px; }
+
+  .savebar{ display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; }
+  .saved-list{ margin-top:14px; display:none; }
+  .saved-list.show{ display:block; }
+  .saved-item{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 4px; border-bottom:1px solid var(--line); font-size:13.5px; }
+  .saved-item .meta{ min-width:0; }
+  .saved-item .nm{ font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .saved-item .dt{ font-size:11px; color:var(--muted); }
+  .saved-item .ops{ display:flex; gap:6px; flex-shrink:0; }
+  .saved-item button{ font-size:12px; padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:#fff; cursor:pointer; font-family:inherit; }
+
+  footer.app{ margin-top:56px; text-align:center; font-size:11px; letter-spacing:0.12em; color:var(--muted); padding-bottom:30px; }
+
+  /* ---- gate ---- */
+  #gate{ position:fixed; inset:0; z-index:100; background:var(--sumi); color:var(--cream); display:flex; align-items:center; justify-content:center; padding:24px; }
+  #gate .box{ width:100%; max-width:360px; text-align:center; }
+  #gate .eng{ color:var(--copper-l); font-size:13px; }
+  #gate h1{ font-family:'Shippori Mincho B1',serif; font-weight:700; font-size:26px; letter-spacing:0.12em; margin:10px 0 26px; }
+  #gate input{ width:100%; padding:14px; font-size:18px; text-align:center; letter-spacing:0.3em; background:rgba(245,243,238,0.08); border:1px solid rgba(245,243,238,0.25); border-radius:10px; color:var(--cream); outline:none; font-family:inherit; }
+  #gate input:focus{ border-color:var(--copper); }
+  #gate button{ margin-top:16px; width:100%; padding:14px; border-radius:999px; border:none; background:var(--copper); color:#fff; font-size:15px; font-weight:700; letter-spacing:0.2em; cursor:pointer; font-family:inherit; }
+  #gate .err{ margin-top:12px; font-size:12.5px; color:#e69a9a; visibility:hidden; }
+  #gate .hint{ margin-top:26px; font-size:11px; color:rgba(245,243,238,0.4); letter-spacing:0.1em; }
+  body.locked .app-body{ display:none; }
+</style>
+</head>
+<body class="locked">
+
+<!-- ============ 合言葉ゲート ============ -->
+<div id="gate">
+  <div class="box">
+    <div class="eng">KATAYAMA DENGYO — INTERNAL TOOL</div>
+    <h1>人工見積り電卓</h1>
+    <input id="gate-pass" type="tel" inputmode="numeric" placeholder="合言葉" autocomplete="off">
+    <button id="gate-btn">ひらく</button>
+    <div class="err" id="gate-err">合言葉がちがいます</div>
+    <div class="hint">合言葉はターコイズ（西村）まで</div>
+  </div>
+</div>
+
+<div class="app-body">
+<header class="app">
+  <div class="inner">
+    <div class="brand">
+      <b>片山電業</b>
+      <span><i></i><em>KATAYAMA DENGYO</em></span>
+    </div>
+    <div class="tool-tag">社内ツール｜人工見積り</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div style="margin-top:34px;">
+    <div class="page-sub">NINKU CALCULATOR</div>
+    <h1 class="page">人工見積り電卓</h1>
+    <p class="lead">受注額と工期を入れると「使える人工数」が出ます。下の割付メモで応援さんへの割り振りと残り予算をその場で確認できます。</p>
+  </div>
+
+  <!-- ============ 入力 ============ -->
+  <section class="card">
+    <h2>案件の入力 <em>INPUT</em></h2>
+    <div class="field">
+      <label class="f" for="in-name">案件名（現場名）</label>
+      <input type="text" id="in-name" placeholder="例）◯◯線 張替え工事">
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label class="f" for="in-amount">受注額（税抜）</label>
+        <div class="inwrap u"><input type="text" id="in-amount" inputmode="numeric" placeholder="3,000,000"><span class="unit">円</span></div>
+      </div>
+      <div class="field">
+        <label class="f" for="in-days">工期</label>
+        <div class="inwrap u"><input type="number" id="in-days" inputmode="numeric" min="1" placeholder="10"><span class="unit">日</span></div>
+      </div>
+      <div class="field">
+        <label class="f" for="in-trip">うち出張（宿泊）</label>
+        <div class="inwrap u"><input type="number" id="in-trip" inputmode="numeric" min="0" value="0"><span class="unit">泊</span></div>
+      </div>
+      <div class="field">
+        <label class="f" for="in-margin">目標粗利率</label>
+        <div class="inwrap u"><input type="number" id="in-margin" inputmode="numeric" min="0" max="90" value="35"><span class="unit">%</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 結果 ============ -->
+  <section class="result">
+    <h2 style="color:var(--cream);">この案件で使える人工 <em>RESULT</em></h2>
+    <div class="r-grid">
+      <div class="r-item hero">
+        <div class="k">使える人工数の上限（粗利<span id="r-margin-label">35</span>%を守る場合）</div>
+        <div class="v"><span id="r-maxninku">—</span><small>人工まで</small></div>
+      </div>
+      <div class="r-item">
+        <div class="k">1日あたり投入できる人数</div>
+        <div class="v"><span id="r-perday">—</span><small>人/日</small></div>
+      </div>
+      <div class="r-item">
+        <div class="k">人工の予算（原価に回せる額）</div>
+        <div class="v"><span id="r-budget">—</span><small>円</small></div>
+      </div>
+      <div class="r-item">
+        <div class="k">平均人工原価（出張経費込み）</div>
+        <div class="v"><span id="r-unitcost">—</span><small>円/人日</small></div>
+      </div>
+      <div class="r-item">
+        <div class="k">確保される粗利</div>
+        <div class="v"><span id="r-profit">—</span><small>円</small></div>
+      </div>
+    </div>
+    <div class="r-note" id="r-note">※ 人工原価 30,000円/人日、出張日は宿泊・食事 9,000円/人日を上乗せして計算（下の設定で変更できます）。</div>
+  </section>
+
+  <!-- ============ 割付メモ ============ -->
+  <section class="card">
+    <h2>割付メモ <em>ASSIGN</em></h2>
+    <p style="font-size:12.5px; color:var(--muted); margin-bottom:12px;">「◯◯さんに ◯人 × ◯日間」を行で追加。合計と残り予算がその場で出ます。</p>
+    <div class="assign-wrap">
+      <table class="assign">
+        <thead>
+          <tr>
+            <th style="min-width:110px;">だれに</th>
+            <th style="width:64px;">人数</th>
+            <th style="width:64px;">日数</th>
+            <th style="width:90px;">単価/人日</th>
+            <th style="width:44px;">出張</th>
+            <th style="text-align:right; min-width:88px;">金額</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="assign-body"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:14px;">
+      <button class="btn btn-line" id="btn-addrow">＋ 行を追加</button>
+    </div>
+    <div class="totals">
+      <div class="t-item"><div class="k">合計人工</div><div class="v"><span id="t-ninku">0</span> 人工</div></div>
+      <div class="t-item"><div class="k">合計金額</div><div class="v"><span id="t-cost">0</span> 円</div></div>
+      <div class="t-item" id="t-rest-wrap"><div class="k">残り予算</div><div class="v"><span id="t-rest">—</span> 円</div></div>
+    </div>
+    <div class="verdict" id="verdict"></div>
+  </section>
+
+  <!-- ============ 設定 ============ -->
+  <details class="settings">
+    <summary>単価の設定（人工原価・出張加算）</summary>
+    <div class="body">
+      <div class="grid2">
+        <div class="field">
+          <label class="f" for="set-cost">人工原価（通常）</label>
+          <div class="inwrap u"><input type="text" id="set-cost" inputmode="numeric" value="30,000"><span class="unit">円/人日</span></div>
+        </div>
+        <div class="field">
+          <label class="f" for="set-trip">出張時の上乗せ（宿泊＋食事）</label>
+          <div class="inwrap u"><input type="text" id="set-trip" inputmode="numeric" value="9,000"><span class="unit">円/人日</span></div>
+        </div>
+      </div>
+      <p style="font-size:11.5px; color:var(--muted);">※ 出張の上乗せは実績 8,000〜10,000円/人日の中間 9,000円を初期値にしています。</p>
+    </div>
+  </details>
+
+  <!-- ============ 保存 ============ -->
+  <section class="card">
+    <h2>案件の保存 <em>SAVE</em></h2>
+    <p style="font-size:12.5px; color:var(--muted); margin-bottom:4px;">この端末（ブラウザ）に保存します。あとから呼び出して続きができます。</p>
+    <div class="savebar">
+      <button class="btn btn-copper" id="btn-save">この案件を保存</button>
+      <button class="btn btn-line" id="btn-new">新しい案件（クリア）</button>
+    </div>
+    <div class="saved-list" id="saved-list"></div>
+  </section>
+
+  <footer class="app">
+    <span class="eng" style="color:var(--copper);">KATAYAMA DENGYO</span><br>
+    人工見積り電卓 v1.0 ｜ 製作: ターコイズ
+  </footer>
+</div>
+</div>
+
+<script>
+/* ================================================================
+   人工見積り電卓 v1.0
+   - 保存先: localStorage（この端末のみ）
+   - GAS_URL を設定するとスプレッドシートにも自動記録されます
+     （tools/gas_code_katayama.gs をGASにデプロイしてURLを貼る）
+   ================================================================ */
+var PASS = '2027';           // 合言葉（年商1億の目標年）
+var GAS_URL = '';            // ← GASデプロイ後にここへ '/exec' URLを貼る
+var LS_KEY = 'kd-ninku-projects';
+var LS_GATE = 'kd-ninku-gate';
+
+/* ---------- gate ---------- */
+(function(){
+  var gate = document.getElementById('gate');
+  function unlock(){ gate.style.display='none'; document.body.classList.remove('locked'); }
+  try{ if(localStorage.getItem(LS_GATE) === PASS){ unlock(); return; } }catch(e){}
+  function attempt(){
+    var v = document.getElementById('gate-pass').value.trim();
+    if(v === PASS){
+      try{ localStorage.setItem(LS_GATE, PASS); }catch(e){}
+      unlock();
+    }else{
+      document.getElementById('gate-err').style.visibility='visible';
+    }
+  }
+  document.getElementById('gate-btn').addEventListener('click', attempt);
+  document.getElementById('gate-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') attempt(); });
+})();
+
+/* ---------- helpers ---------- */
+function yen(n){ return isFinite(n) ? Math.round(n).toLocaleString('ja-JP') : '—'; }
+function num(el){ return parseFloat(String(el.value).replace(/[,，\s円]/g,'')) || 0; }
+function fmtInput(el){
+  el.addEventListener('blur', function(){
+    var v = num(el); el.value = v ? v.toLocaleString('ja-JP') : '';
+  });
+}
+['in-amount','set-cost','set-trip'].forEach(function(id){ fmtInput(document.getElementById(id)); });
+
+/* ---------- 割付行 ---------- */
+var assignBody = document.getElementById('assign-body');
+function addRow(data){
+  data = data || {};
+  var tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td><input type="text" class="a-name" placeholder="例）田中さん" value="'+(data.name||'')+'"></td>'+
+    '<td><input type="number" class="a-people num" inputmode="numeric" min="0" value="'+(data.people!=null?data.people:'')+'" placeholder="2"></td>'+
+    '<td><input type="number" class="a-days num" inputmode="numeric" min="0" value="'+(data.days!=null?data.days:'')+'" placeholder="5"></td>'+
+    '<td><input type="text" class="a-rate num" inputmode="numeric" value="'+(data.rate!=null?Number(data.rate).toLocaleString('ja-JP'):'')+'" placeholder="30,000"></td>'+
+    '<td class="trip-cell"><input type="checkbox" class="a-trip"'+(data.trip?' checked':'')+'></td>'+
+    '<td class="amt a-amt">0円</td>'+
+    '<td><button class="rm" title="行を削除">×</button></td>';
+  tr.querySelector('.rm').addEventListener('click', function(){ tr.remove(); calc(); });
+  tr.querySelectorAll('input').forEach(function(i){
+    i.addEventListener('input', calc);
+    if(i.classList.contains('a-rate')) fmtInput(i);
+  });
+  assignBody.appendChild(tr);
+  calc();
+}
+document.getElementById('btn-addrow').addEventListener('click', function(){ addRow(); });
+
+/* ---------- 計算 ---------- */
+function readState(){
+  var rows = [];
+  assignBody.querySelectorAll('tr').forEach(function(tr){
+    rows.push({
+      name: tr.querySelector('.a-name').value,
+      people: parseFloat(tr.querySelector('.a-people').value)||0,
+      days: parseFloat(tr.querySelector('.a-days').value)||0,
+      rate: num(tr.querySelector('.a-rate')),
+      trip: tr.querySelector('.a-trip').checked
+    });
+  });
+  return {
+    name: document.getElementById('in-name').value,
+    amount: num(document.getElementById('in-amount')),
+    days: parseFloat(document.getElementById('in-days').value)||0,
+    tripNights: parseFloat(document.getElementById('in-trip').value)||0,
+    margin: parseFloat(document.getElementById('in-margin').value)||0,
+    baseCost: num(document.getElementById('set-cost')) || 30000,
+    tripAdd: num(document.getElementById('set-trip')) || 9000,
+    rows: rows
+  };
+}
+
+function calc(){
+  var s = readState();
+  var mR = Math.min(Math.max(s.margin,0),90)/100;
+  document.getElementById('r-margin-label').textContent = s.margin || 0;
+  document.getElementById('r-note').textContent =
+    '※ 人工原価 '+yen(s.baseCost)+'円/人日、出張日は宿泊・食事 '+yen(s.tripAdd)+'円/人日を上乗せして計算（下の設定で変更できます）。';
+
+  var budget = s.amount * (1 - mR);
+  var tripRatio = s.days > 0 ? Math.min(s.tripNights, s.days)/s.days : 0;
+  var unitCost = s.baseCost + s.tripAdd * tripRatio;
+  var maxNinku = (s.amount > 0 && unitCost > 0) ? Math.floor(budget / unitCost) : 0;
+  var perDay = (s.days > 0 && maxNinku > 0) ? (maxNinku / s.days) : 0;
+
+  document.getElementById('r-budget').textContent = s.amount>0 ? yen(budget) : '—';
+  document.getElementById('r-unitcost').textContent = s.amount>0 ? yen(unitCost) : '—';
+  document.getElementById('r-maxninku').textContent = s.amount>0 ? maxNinku.toLocaleString('ja-JP') : '—';
+  document.getElementById('r-perday').textContent = perDay>0 ? (Math.round(perDay*10)/10).toLocaleString('ja-JP') : '—';
+  document.getElementById('r-profit').textContent = s.amount>0 ? yen(s.amount*mR) : '—';
+
+  /* 割付合計 */
+  var tNinku=0, tCost=0;
+  assignBody.querySelectorAll('tr').forEach(function(tr){
+    var p = parseFloat(tr.querySelector('.a-people').value)||0;
+    var d = parseFloat(tr.querySelector('.a-days').value)||0;
+    var r = num(tr.querySelector('.a-rate')) || s.baseCost;
+    var trip = tr.querySelector('.a-trip').checked;
+    var nk = p*d;
+    var amt = nk * (r + (trip ? s.tripAdd : 0));
+    tNinku += nk; tCost += amt;
+    tr.querySelector('.a-amt').textContent = amt>0 ? yen(amt)+'円' : '0円';
+  });
+  document.getElementById('t-ninku').textContent = tNinku.toLocaleString('ja-JP');
+  document.getElementById('t-cost').textContent = yen(tCost);
+  var rest = budget - tCost;
+  var restEl = document.getElementById('t-rest');
+  restEl.textContent = s.amount>0 ? yen(rest) : '—';
+  document.getElementById('t-rest-wrap').classList.toggle('neg', s.amount>0 && rest<0);
+
+  /* 実績粗利の判定（§5: 35%基準・30%切りアラート） */
+  var v = document.getElementById('verdict');
+  if(s.amount>0 && tCost>0){
+    var gp = (s.amount - tCost)/s.amount*100;
+    var gpTxt = (Math.round(gp*10)/10).toLocaleString('ja-JP');
+    if(gp >= 35){
+      v.className='verdict ok';
+      v.innerHTML='この割付なら粗利 <b>'+gpTxt+'%</b>。基準（35%）をクリアしています。';
+    }else if(gp >= 30){
+      v.className='verdict warn';
+      v.innerHTML='この割付の粗利は <b>'+gpTxt+'%</b>。基準の35%を下回っています。単価か人工数の見直しを。';
+    }else{
+      v.className='verdict bad';
+      v.innerHTML='⚠ 粗利 <b>'+gpTxt+'%</b>。30%を切っています。この条件では利益がほぼ残りません。';
+    }
+  }else{
+    v.className='verdict';
+  }
+}
+['in-amount','in-days','in-trip','in-margin','set-cost','set-trip','in-name'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', calc);
+});
+
+/* ---------- 保存（localStorage ＋ GAS任意） ---------- */
+function loadProjects(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }catch(e){ return []; } }
+function saveProjects(arr){ try{ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }catch(e){} }
+
+function renderSaved(){
+  var list = document.getElementById('saved-list');
+  var arr = loadProjects();
+  if(!arr.length){ list.className='saved-list'; list.innerHTML=''; return; }
+  list.className='saved-list show';
+  list.innerHTML = arr.map(function(p,i){
+    return '<div class="saved-item">'+
+      '<div class="meta"><div class="nm">'+(p.name||'（名称なし）')+'</div>'+
+      '<div class="dt">'+p.savedAt+'｜受注 '+yen(p.amount)+'円／'+p.days+'日</div></div>'+
+      '<div class="ops"><button data-load="'+i+'">ひらく</button><button data-del="'+i+'">削除</button></div>'+
+      '</div>';
+  }).join('');
+  list.querySelectorAll('[data-load]').forEach(function(b){
+    b.addEventListener('click', function(){ loadProject(parseInt(b.getAttribute('data-load'),10)); });
+  });
+  list.querySelectorAll('[data-del]').forEach(function(b){
+    b.addEventListener('click', function(){
+      if(!confirm('この保存を削除しますか？')) return;
+      var arr = loadProjects(); arr.splice(parseInt(b.getAttribute('data-del'),10),1);
+      saveProjects(arr); renderSaved();
+    });
+  });
+}
+
+function loadProject(i){
+  var p = loadProjects()[i]; if(!p) return;
+  document.getElementById('in-name').value = p.name||'';
+  document.getElementById('in-amount').value = p.amount ? p.amount.toLocaleString('ja-JP') : '';
+  document.getElementById('in-days').value = p.days||'';
+  document.getElementById('in-trip').value = p.tripNights||0;
+  document.getElementById('in-margin').value = p.margin||35;
+  assignBody.innerHTML='';
+  (p.rows||[]).forEach(addRow);
+  if(!(p.rows||[]).length) addRow();
+  calc();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('btn-save').addEventListener('click', function(){
+  var s = readState();
+  if(!s.amount){ alert('受注額を入れてから保存してください'); return; }
+  s.savedAt = new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  var arr = loadProjects();
+  var idx = arr.findIndex(function(p){ return p.name && p.name === s.name; });
+  if(idx >= 0) arr[idx] = s; else arr.unshift(s);
+  saveProjects(arr.slice(0,50));
+  renderSaved();
+  if(GAS_URL.indexOf('http') === 0){
+    fetch(GAS_URL, { method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify(Object.assign({type:'ninku'}, s))
+    }).catch(function(){});
+  }
+  var btn = this; btn.textContent='保存しました ✓';
+  setTimeout(function(){ btn.textContent='この案件を保存'; }, 1600);
+});
+
+document.getElementById('btn-new').addEventListener('click', function(){
+  if(!confirm('入力内容をクリアして新しい案件を始めますか？（保存済みは残ります）')) return;
+  ['in-name','in-amount','in-days'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('in-trip').value=0;
+  document.getElementById('in-margin').value=35;
+  assignBody.innerHTML=''; addRow(); calc();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+/* ---------- init ---------- */
+addRow();
+renderSaved();
+calc();
+</script>
+</body>
+</html>
